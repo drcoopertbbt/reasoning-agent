@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>O-RAN Agent Workflow - Reasoning</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 50px; }
+        textarea { width: 100%; height: 100px; }
+        button { padding: 10px 20px; margin-top: 10px; }
+        #response { margin-top: 20px; white-space: pre-wrap; }
+        .thinking-step { color: gray; }
+        .error { color: red; }
+        #pinnedSteps { margin-bottom: 10px; }
+        #toggleLogs { margin-top: 10px; }
+
+        /* Modal styling */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-height: 70%;
+            overflow-y: auto;
+            border-radius: 10px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>O-RAN Agent Workflow - Reasoning</h1>
+    <textarea id="prompt" placeholder='Enter your prompt here...'></textarea><br>
+    <button id="generateBtn">Generate</button>
+    <div id="response">
+        <div id="pinnedSteps"></div>
+        <button id="toggleLogs" style="display: none;">Show Logs</button>
+    </div>
+
+    <!-- Modal for logs -->
+    <div id="logModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <pre id="logContent"></pre>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const generateBtn = document.getElementById('generateBtn');
+            const toggleLogsBtn = document.getElementById('toggleLogs');
+            const logModal = document.getElementById('logModal');
+            const closeModalBtn = document.querySelector('.close');
+            const logContentPre = document.getElementById('logContent');
+            const pinnedStepsDiv = document.getElementById('pinnedSteps');
+
+            generateBtn.addEventListener('click', sendPrompt);
+            toggleLogsBtn.addEventListener('click', showLogsModal);
+            closeModalBtn.addEventListener('click', closeLogsModal);
+            window.addEventListener('click', outsideClick);
+
+            async function sendPrompt() {
+                const prompt = document.getElementById('prompt').value;
+                generateBtn.disabled = true;
+
+                // Clear previous responses
+                pinnedStepsDiv.innerHTML = '';
+                logContentPre.innerHTML = '';
+                toggleLogsBtn.style.display = 'none';
+
+                const collectedData = []; // Array to collect data
+
+                const thinkingSteps = [
+                    {
+                        message: 'Analyzing the question...',
+                        endpoint: '/api/centralized-alarm'
+                    },
+                    {
+                        message: 'Gathering relevant information...',
+                        endpoint: '/api/root-cause-analysis'
+                    },
+                    {
+                        message: 'Processing data...',
+                        endpoint: '/api/automated-fault-detection'
+                    },
+                    {
+                        message: 'Applying best practices...',
+                        endpoint: '/api/alarm-design-best-practices'
+                    },
+                    {
+                        message: 'Reviewing alarm logging and data analysis...',
+                        endpoint: '/api/alarm-logging-data-analysis'
+                    }
+                ];
+
+                async function fetchAndDisplay(step) {
+                    pinnedStepsDiv.innerHTML += `<p class="thinking-step">${step.message}</p>`;
+                    try {
+                        const apiResponse = await fetch(`http://localhost:3005${step.endpoint}`);
+                        if (!apiResponse.ok) {
+                            throw new Error(`HTTP error! status: ${apiResponse.status}`);
+                        }
+                        const data = await apiResponse.json();
+                        logContentPre.innerHTML += `<p class="thinking-step">${step.message}</p>`;
+                        logContentPre.innerHTML += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+
+                        // Collect the data for sending to the backend
+                        collectedData.push({
+                            step: step.message,
+                            data: data
+                        });
+                    } catch (error) {
+                        console.error(`Error fetching data from ${step.endpoint}:`, error);
+                        logContentPre.innerHTML += `<p class="error">Error fetching data: ${error.message}</p>`;
+                    }
+                }
+
+                // Execute thinking steps sequentially
+                for (const step of thinkingSteps) {
+                    await fetchAndDisplay(step);
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+
+                toggleLogsBtn.style.display = 'block';
+
+                // After thinking steps, call the backend API for the final response
+                try {
+                    pinnedStepsDiv.innerHTML += `<p class="thinking-step">Formulating the final answer...</p>`;
+                    const response = await fetch('http://127.0.0.1:8000/generate', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            prompt: prompt,
+                            data: collectedData  // Include the collected data
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const responseData = await response.json();
+                    pinnedStepsDiv.innerHTML += `<p><strong>Response:</strong> ${responseData.response}</p>`;
+                } catch (error) {
+                    console.error('Error generating final response:', error);
+                    pinnedStepsDiv.innerHTML += `<p class="error">Error: ${error.message}</p>`;
+                } finally {
+                    generateBtn.disabled = false;
+                }
+            }
+
+            function showLogsModal() {
+                logModal.style.display = 'block';
+            }
+
+            function closeLogsModal() {
+                logModal.style.display = 'none';
+            }
+
+            function outsideClick(event) {
+                if (event.target === logModal) {
+                    logModal.style.display = 'none';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+    "YANG_Models": {
+        "description": "Ensure consistent fault reporting across vendors using YANG models",
+        "purpose": "Uniform interpretation of alarms",
+        "supported_systems": [
+            "O-RU",
+            "O-DU",
+            "O-CU"
+        ]
+    }
+}

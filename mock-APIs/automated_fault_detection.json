@@ -1,0 +1,18 @@
+{
+    "Automated_Workflows": {
+        "description": "Handle recurring faults with automated processes",
+        "actions": [
+            "Fault detection",
+            "Logging",
+            "Resetting or reconfiguring components"
+        ]
+    },
+    "Fault_Prediction": {
+        "description": "Predict early warning signs using analytics",
+        "example_indicators": [
+            "Packet loss",
+            "Increased latency"
+        ],
+        "action": "Take preventative measures before failure occurs"
+    }
+}

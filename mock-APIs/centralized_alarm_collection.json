@@ -1,0 +1,23 @@
+{
+    "Unified_Interface_O1": {
+        "description": "Centralized fault management using the O1 interface",
+        "alarms_collected_from": [
+            "O-RU",
+            "O-DU",
+            "O-CU"
+        ],
+        "responsible_system": "SMO",
+        "aggregation_type": "real-time"
+    },
+    "Alarm_Classification": {
+        "classification_types": [
+            "warning",
+            "minor",
+            "major",
+            "critical"
+        ],
+        "purpose": "Prioritize responses based on severity"
+    }
+}
+
+

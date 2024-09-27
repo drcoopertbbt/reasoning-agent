@@ -1,0 +1,10 @@
+{
+    "Avoid_Alarm_Flooding": {
+        "description": "Prevent alarm flooding by filtering redundant alarms",
+        "purpose": "Prioritize root cause alarms and avoid overwhelming operators"
+    },
+    "Clear_Documentation": {
+        "description": "Ensure all fault codes and their meanings are well documented",
+        "purpose": "Streamline diagnosis and resolution processes"
+    }
+}
