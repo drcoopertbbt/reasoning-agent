@@ -39,12 +39,7 @@ This project contains two services for managing and analyzing O-RAN agent workfl
     pip install -r requirements.txt
     ```
 
-4. **Set up environment variables**:
 
-   - Create a `.env` file inside the `fastapi-service` folder:
-     ```bash
-     OPENAI_API_KEY=your_openai_api_key
-     ```
 
 ## Express API
 
